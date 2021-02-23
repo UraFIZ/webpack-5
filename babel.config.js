@@ -7,6 +7,7 @@ if (process.env.NODE_ENV !== "production") {
 module.exports = {
   presets: [
     "@babel/preset-env",
+    "@babel/typescript",
     // Runtime automatic with React 17+ allows not importing React
     // in files only using JSX (no state or React methods)
     ["@babel/preset-react", { runtime: "automatic" }],

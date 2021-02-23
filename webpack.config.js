@@ -4,26 +4,28 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
-let mode = "development";
-let target = "web";
-const plugins = [
-  new CleanWebpackPlugin(),
-  new MiniCssExtractPlugin(),
-  new HtmlWebpackPlugin({
-    template: "./src/index.html",
-  }),
-];
+let isProd = process.env.NODE_ENV === "production";
+let mode = isProd ? "production" : "development";
+let target = isProd ? "browserslist" : "web";
 
-if (process.env.NODE_ENV === "production") {
-  mode = "production";
-  // Temporary workaround for 'browserslist' bug that is being patched in the near future
-  target = "browserslist";
+const plugins = () => {
+  const plugs = [
+    new CleanWebpackPlugin(),
+    new MiniCssExtractPlugin(),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+    }),
+  ];
+
+  if (process.env.SERVE) {
+    // We only want React Hot Reloading in serve mode
+    plugs.push(new ReactRefreshWebpackPlugin());
+  }
+
+  return plugs;
 }
 
-if (process.env.SERVE) {
-  // We only want React Hot Reloading in serve mode
-  plugins.push(new ReactRefreshWebpackPlugin());
-}
+
 
 module.exports = {
   // mode defaults to 'production' if not set
@@ -31,7 +33,9 @@ module.exports = {
 
   // This is unnecessary in Webpack 5, because it's the default.
   // However, react-refresh-webpack-plugin can't find the entry without it.
-  entry: "./src/index.js",
+  entry: {
+    index: "./src/index.tsx"
+  },
 
   output: {
     // output path is required for `clean-webpack-plugin`
@@ -80,21 +84,15 @@ module.exports = {
         // },
       },
       {
-        test: /\.jsx?$/,
+        test: /\.tsx?$/,
         exclude: /node_modules/,
-        use: {
-          // without additional settings, this will reference .babelrc
-          loader: "babel-loader",
-          options: {
-            /**
-             * From the docs: When set, the given directory will be used
-             * to cache the results of the loader. Future webpack builds
-             * will attempt to read from the cache to avoid needing to run
-             * the potentially expensive Babel recompilation process on each run.
-             */
-            cacheDirectory: true,
+        use: [
+          !isProd && {
+            loader: 'babel-loader',
+            options: { cacheDirectory: true, }
           },
-        },
+          'ts-loader'
+        ].filter(Boolean)
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
@@ -103,14 +101,14 @@ module.exports = {
     ],
   },
 
-  plugins: plugins,
+  plugins: plugins(),
 
   target: target,
 
   devtool: "source-map",
 
   resolve: {
-    extensions: [".js", ".jsx"],
+    extensions: [".js", ".jsx", ".ts", ".tsx"]
   },
 
   // required if using webpack-dev-server
