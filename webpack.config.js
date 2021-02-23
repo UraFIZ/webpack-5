@@ -3,6 +3,8 @@ const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin"
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
+const OptimizeCssAssetWebpackPlugin = require('optimize-css-assets-webpack-plugin');
 
 let isProd = process.env.NODE_ENV === "production";
 let mode = isProd ? "production" : "development";
@@ -25,7 +27,19 @@ const plugins = () => {
   return plugs;
 }
 
+const optimization = () => {
+  const config = {
+    splitChunks: {
+      chunks: 'all',
+    },
+  };
 
+  if (isProd) {
+    config.minimizer = [new OptimizeCssAssetWebpackPlugin(), new TerserPlugin()];
+  }
+
+  return config;
+};
 
 module.exports = {
   // mode defaults to 'production' if not set
@@ -111,6 +125,7 @@ module.exports = {
     extensions: [".js", ".jsx", ".ts", ".tsx"]
   },
 
+  optimization: optimization(),
   // required if using webpack-dev-server
   devServer: {
     contentBase: "./dist",
