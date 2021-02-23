@@ -130,5 +130,7 @@ module.exports = {
   devServer: {
     contentBase: "./dist",
     hot: true,
+    port: 7000,
+    open: true,
   },
 };
