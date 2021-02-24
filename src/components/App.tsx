@@ -1,4 +1,3 @@
-// No need to import "react" just for JSX in React 17+
 import React, { ReactElement } from "react";
 import Recipes from "./Recipes";
 import sword from "../images/swc-sword.png";
