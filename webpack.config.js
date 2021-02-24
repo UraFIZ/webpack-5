@@ -122,7 +122,10 @@ module.exports = {
   devtool: "source-map",
 
   resolve: {
-    extensions: [".js", ".jsx", ".ts", ".tsx"]
+    extensions: [".js", ".jsx", ".ts", ".tsx"],
+    alias: {
+      src: path.resolve(__dirname, 'src'),
+    },
   },
 
   optimization: optimization(),
